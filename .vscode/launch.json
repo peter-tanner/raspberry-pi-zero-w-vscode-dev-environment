@@ -1,22 +1,22 @@
 {
-    "version": "0.2.0",
-    "configurations": [
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Python",
+      "type": "debugpy",
+      "request": "attach",
+      "preLaunchTask": "start-debugging",
+      "postDebugTask": "stop-debugging",
+      "connect": {
+        "host": "${config:ws_rpi_address}",
+        "port": "${config:ws_rpi_debug_port}"
+      },
+      "pathMappings": [
         {
-            "name": "Debug Python",
-            "type": "python",
-            "request": "attach",
-            "preLaunchTask": "start-debugging",
-            "postDebugTask": "stop-debugging",
-            "connect": {
-                "host": "raspberrypi.local",
-                "port": 5678
-            },
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "/home/pi/workspace"
-                }
-            ]
+          "localRoot": "${workspaceFolder}",
+          "remoteRoot": "${config:ws_rpi_remote_path}"
         }
-    ]
+      ]
+    }
+  ]
 }

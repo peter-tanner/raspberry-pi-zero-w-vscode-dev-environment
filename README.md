@@ -1,128 +1,45 @@
-Raspberry Pi Zero W Python Development Environment
-===========================================
+# Raspberry Pi Zero W Python Development Environment
 
-This project describes how to setup a Raspberry Pi Zero W for remote Python development using VSCode.  
+This project describes how to set up a Raspberry Pi Zero W for remote Python development using vscode.  
 Once setup, you can develop and single-step debug Python scripts from your local PC and execute on a remote Raspberry Pi Zero W.
 
-The following was adapted from:
-https://bitbucket.org/jIRI/rasp-pi-zerow-vscode/src/master/
+**The following was adapted from [driedler/rpi0w_dev_env](https://github.com/driedler/rpi0w_dev_env) which was adapted from
+[jIRI/rasp-pi-zerow-vscode](https://bitbucket.org/jIRI/rasp-pi-zerow-vscode/src/master/)**. Thank you!
 
-__NOTE:__ See [rpi0_tflite_picamera](https://github.com/driedler/rpi0_tflite_picamera) which is provides a more realistic dev environment.
+CHANGES FROM [driedler/rpi0w_dev_env](https://github.com/driedler/rpi0w_dev_env): This version does not require `dirsync` from python or `putty` and simply uses `robocopy` and `ssh.exe` to replace these third-party utilities respectively, and simplifies configuration by using a `settings.json` file instead of manual replacement.
 
-# Hardware 
+This setup also does not use mDNS and you must specify the pi's static IP address, since I did not want to go through the trouble of setting this up with my unique network configuration.
 
-This assumes you have a Raspberry Pi Zero W (W = built-in wifi/bluetooth support).
-There a tons of dev kits available, e.g.:
-https://www.canakit.com/raspberry-pi-zero-wireless.html?src=raspberrypi
+## Hardware
 
-__NOTE:__ You need a micro SD card, the RPI board-only doesn't have onboard ROM to store the OS.
+This assumes you have a Raspberry Pi Zero W (W = built-in Wi-Fi/Bluetooth support).
 
-__NOTE:__ You might also need a micro SD reader if you computer doesn't have one. e.g.:  
-https://www.amazon.com/s?k=usb+micro+sd+card+reader
+## Raspberry Pi Setup
 
+### 1) Create a key and add it to the pi during the setup
 
-# Raspbery Pi Setup
+There is a section to add a public key for SSH. Also enable ssh on the pi.
 
-## 1) Program Raspberry Pi OS to SD Card 
+You may also add a key to `~/.ssh/authorized_keys` after installation (I had to do this to add a key without a passphrase to make developing less annoying since every ssh command will require passphrase authentication if you have one set.)
 
-Plug the SD card in your computer's SD card reader, then  
-use the Raspberry PI Imager to program RPI OS to your micro SD card:  
-https://www.raspberrypi.org/software/
+### 2) (Optional) Enable network over USB
 
-It's recommended to start with the default OS (with desktop support) before getting crazy with RPI OS-lite.
+Follow a guide like [adafruit's tutorial](https://learn.adafruit.com/turning-your-raspberry-pi-zero-into-a-usb-gadget/ethernet-gadget) on how to enable the Ethernet gadget. There are some parts of which are out of date since the tutorial was created for Windows 7 (such as installing the RNDIS driver), if you are stuck you may want to look at my experience setting this up on my website.
 
-## 2) Enable network over USB
+### 3) (Optional) Configure sharing on your Windows network adapter so Pi can see the Internet
 
-After programming RPI OS from setup 1, unplug the SD card, then plugin it back into your computer.
-Go to your file explorer, you should see the SD card be mounted as a new drive (at least on Windows)
-with a description as: `boot`.
+If you are using USB ethernet as described in the first step, follow this step to allow the Pi to access the network.
 
-Open the SD card 'boot' drive and edit the following files in the root of the SD card:
-
-__config.txt:__  
-Open `config.txt` and to the end add:
-```
-dtoverlay=dwc2
-```
-More details about config.txt here:  
-https://www.raspberrypi.org/documentation/configuration/config-txt/
-
-__cmdline.txt:__  
-Open `cmdline.txt`, just after `rootwait` add:
-```
-modules-load=dwc2,g_ether
-```
-
-__ssh__   
-Create empty file named `ssh` in root of the SD card
-
-## 3) Install mDNS onto your computer
-
-If you're using Windows, install:
-https://support.apple.com/kb/DL999?viewlocale=en_US&locale=en_US
-
-If you're using Linux, install:
-```
-sudo apt-get install avahi-daemon
-```
-
-## 4) Start the Raspberry Pi Zero W
-
-Unmount the SD card an plug it into the RPI.
-Then plug the USB micro into the RPI's `USB` port (_not_ PWR) and the other side into your computer.
-
-## 5) Configure sharing on your Windows network adapter so Pi can see the Internet
-Go somewhere around __Control Panel -> Network and Internet -> Network Connections__  
+Go somewhere around **Control Panel -> Network and Internet -> Network Connections**  
 Double click your default network connection, click Properties..., tab Sharing
 
-## 6) Open an SSH session to the RPI
+NOTE: **This will likely make any VMs or WSL instances unable to see the internet while sharing is active**
 
-On Windows, PuTTY is recommended: http://www.putty.org/
-
-Connect over SSH (port 22) with connection string: `pi@raspberrypi.local`   
-Accept certificate  
-Default password is `raspberry`
-
-## 7) Configure Wi-Fi
-
-From the SSH session, issue the command:
-
-```
-sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
-```
-From the opened file editor, add the following to the end:
-
-```
-network={
-  ssid="MY_NETWORK_NAME"
-  psk="MY_NETWORK_PASSWORD"
-}
-```
-Updating `MY_NETWORK_NAME` and `MY_NETWORK_PASSWORD` with your Wi-Fi info.
-
-Then, `Ctrl+O` to save, `Ctrl+X` to exit nano.
-
-Next, issue the command:
-
-```
-sudo wpa_cli reconfigure
-```
-
-Then issue the command:
-
-```
-sudo reboot
-```
-
-This will reboot the RPI and close your SSH session. 
-You'll need to start a new SSH session for the subsequent steps.
-
-
-## 8) Create the workspace directory 
+### 4) Create the workspace directory
 
 From the RPI SSH session (step 7), issue the command:
 
-```
+```bash
 mkdir workspace
 chmod 0777 workspace
 cd workspace
@@ -131,26 +48,30 @@ pwd
 
 Which should create the directory:
 
-```
+```txt
 /home/pi/workspace
 ```
 
-## 9) Update Pi, install samba, config samba
+If you are using a different directory, change `"ws_rpi_remote_path"` in `settings.json`.
+
+### 5) Update Pi, install samba, config samba
 
 From the RPI SSH session (step 7), issue the commands:
 
-```
+```bash
 sudo apt-get update
 sudo apt-get install -y samba samba-common-bin
 ```
 
 Then issue:
 
-```
+```bash
 sudo nano /etc/samba/smb.conf
 ```
+
 Add to the end of file:
-```
+
+```bash
 [workspace]
 path=/home/pi/workspace
 browsable=yes
@@ -162,75 +83,95 @@ public=yes
 ```
 
 Then issue:
-```
+
+```bash
 sudo service smbd restart
 ```
 
 In your local file explorer, you should be able to open (on Windows):
-```
-\\RASPBERRYPI\workspace
+
+```batch
+\\<STATIC IP>\workspace
 ```
 
-
-## 10) Install debugpy on the Pi to be able debug remotely
+### 6) Install debugpy on the Pi to be able debug remotely
 
 We use [debugpy](https://github.com/microsoft/debugpy) to enable Python remote debugging.
 
 From the RPI SSH session (step 7), issue the command:
 
+```bash
+sudo pip3 install debugpy
 ```
-sudo pip3 install debugpy==1.3.0
+
+I am using `debugpy` version 1.8.2 as of time of writing.
+
+### 7) Open a port for `debugpy` access
+
+By default, this workspace uses port 5678. Change as required.
+
+Install `ufw` and allow this port.
+
+```bash
+sudo apt install ufw
+sudo ufw allow 5678
 ```
-(You may be able to use a newer version, but that version worked for me)
 
-__NOTE:__ This repo uses Python3, hence `pip3`.
-
-## 12) Resize your Pi partition to use all available space on SD card
+### 8) Resize your Pi partition to use all available space on SD card
 
 From the RPI SSH session (step 7), issue the commands:
-```
+
+```bash
 sudo raspi-config --expand-rootfs
 sudo reboot
 ```
 
-# Prepare VSCode Workspace
+## Prepare VSCode Workspace
 
-## 1) Install the dirsync Python package
+### 9) Open VSCode Workspace
 
+Clone this repository to a directory on your host machine.
 
-We use the [dirsync](https://pypi.org/project/dirsync/) Python package
-to automatically synchronize files between the local workspace and the remote RPI workspace.
-
-Issue the following command from a local terminal to install the package:
-
-```
-pip3 install dirsync
-```
-
-After installing, the `dirsync` command should be accessbile to VSCode.
-
-## 2) Open VSCode Workspace
-
-Assuming you cloned this repo, open the VSCode 'workspace' that is at the root of this repo: `workspace.code-workspace` 
+Open the VSCode 'workspace' that is at the root of this repo: `workspace.code-workspace`
 then install the 'Recommended Extensions'.
 
-## 3) Map Network Drive
+### 10) Map Network Drive
 
-If using Windows, map the `\\RASPBERRYPI\workspace` network drive, more details [here](https://support.microsoft.com/en-us/windows/map-a-network-drive-in-windows-10-29ce55d1-34e3-a7e2-4801-131475f9557d)  
+If using Windows, map the `\\<PI STATIC IP ADDRESS>\workspace` network drive, more details [here](https://support.microsoft.com/en-us/windows/map-a-network-drive-in-windows-10-29ce55d1-34e3-a7e2-4801-131475f9557d)  
 After this is complete, you should have a new drive, e.g. `Z:\\` that points to your RPI's `/home/pi/workspace` directory.
 
 This is required so we can easily sync the local workspace with the RPI's workspace.
 
-## 4) Update tasks.json
+### 11) Clone this repository and configure
 
-Open `<repo root>/.vscode/tasks.json`,
+Open `.vscode/settings.json`:
 
-In the `sync-workspace` task, update the arguments as necessary for your workspace.  
-At a minimum, you may need to change `z:/` to your networking mapping drive from the previous step.
+```json
+{
+  "ws_rpi_address": "<YOUR PI STATIC IP ADDRESS HERE>",
+  "ws_rpi_share_drive_letter": "Z",
+  "ws_rpi_entrypoint_file": "./main.py",
+  "ws_rpi_user": "pi", // Default username is `pi`
+  "ws_rpi_remote_path": "/home/pi/workspace",
+  "ws_rpi_debug_port": 5678
+}
+```
 
-# Run the debugger
+Change these parameters as required. This is an explanation of each parameter and what step it applies to:
+
+| Parameter                     | Step                                                                                 | Explanation                                                                                                                                                                                     |
+| ----------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"ws_rpi_address"`            | Always                                                                               | **You must alwayas** manually set this to your pi's static ip, which can be found with `ip a`.                                                                                                  |
+| `"ws_rpi_share_drive_letter"` | [10](#10-map-network-drive)                                                          | Windows explorer may assign a different drive letter to the samba share than `Z:\\`, in this case change `"ws_rpi_share_drive_letter"` to the **letter only** (Do not include colon or slashes) |
+| `"ws_rpi_entrypoint_file"`    |                                                                                      | Change this if you have decided to change the entrypoint file, `main.py`                                                                                                                        |
+| `"ws_rpi_user"`               | Installation                                                                         | Change this if you have set a username in the imager wizard. The default name is `pi`.                                                                                                          |
+| `"ws_rpi_remote_path"`        | [4](#4-create-the-workspace-directory), [5](#5-update-pi-install-samba-config-samba) | Change this if you are using a different directory to store the code on the raspberry pi side.                                                                                                  |
+| `"ws_rpi_debug_port"`         | [7](#7-open-a-port-for-debugpy-access)                                               | Change this if you are not using the port of `5678` for the `debugpy` server on the side of the raspberry pi                                                                                    |
+
+## Run the debugger
 
 That's it! Running the `Debug Python` debug configuration should:
+
 1. Synchronize the local workspace with the RPI's workspace (assuming the network drive is properly mapped)
 2. Start the `main.py` python script with remote debugging enabled
 3. Cause VSCode to connect to the debug server and allow for single-stepping in the Python script as if it were running locally
