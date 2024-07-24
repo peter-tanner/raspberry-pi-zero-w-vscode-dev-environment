@@ -24,7 +24,9 @@ You may also add a key to `~/.ssh/authorized_keys` after installation (I had to 
 
 ### 2) (Optional) Enable network over USB
 
-Follow a guide like [adafruit's tutorial](https://learn.adafruit.com/turning-your-raspberry-pi-zero-into-a-usb-gadget/ethernet-gadget) on how to enable the Ethernet gadget. There are some parts of which are out of date since the tutorial was created for Windows 7 (such as installing the RNDIS driver), if you are stuck you may want to look at my experience setting this up on my website.
+Follow a guide like [adafruit's tutorial](https://learn.adafruit.com/turning-your-raspberry-pi-zero-into-a-usb-gadget/ethernet-gadget) on how to enable the Ethernet gadget. There are some parts of which are out of date since the tutorial was created for Windows 7 (such as installing the RNDIS driver), if you are stuck you may want to look at my experience setting this up on my website
+
+[https://www.petertanner.dev/posts/Raspberry-Pi-Zero-USB-EthernetRNDIS-Gadget-troubleshooting/](https://www.petertanner.dev/posts/Raspberry-Pi-Zero-USB-EthernetRNDIS-Gadget-troubleshooting/).
 
 ### 3) (Optional) Configure sharing on your Windows network adapter so Pi can see the Internet
 
