@@ -151,7 +151,7 @@ Open `.vscode/settings.json`:
 ```json
 {
   "ws_rpi_address": "<YOUR PI STATIC IP ADDRESS HERE>",
-  "ws_rpi_share_drive_letter": "Z",
+  "ws_rpi_sync_path": "Z:\\",
   "ws_rpi_entrypoint_file": "./main.py",
   "ws_rpi_user": "pi", // Default username is `pi`
   "ws_rpi_remote_path": "/home/pi/workspace",
@@ -161,14 +161,14 @@ Open `.vscode/settings.json`:
 
 Change these parameters as required. This is an explanation of each parameter and what step it applies to:
 
-| Parameter                     | Step                                                                                 | Explanation                                                                                                                                                                                     |
-| ----------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `"ws_rpi_address"`            | Always                                                                               | **You must alwayas** manually set this to your pi's static ip, which can be found with `ip a`.                                                                                                  |
-| `"ws_rpi_share_drive_letter"` | [10](#10-map-network-drive)                                                          | Windows explorer may assign a different drive letter to the samba share than `Z:\\`, in this case change `"ws_rpi_share_drive_letter"` to the **letter only** (Do not include colon or slashes) |
-| `"ws_rpi_entrypoint_file"`    |                                                                                      | Change this if you have decided to change the entrypoint file, `main.py`                                                                                                                        |
-| `"ws_rpi_user"`               | Installation                                                                         | Change this if you have set a username in the imager wizard. The default name is `pi`.                                                                                                          |
-| `"ws_rpi_remote_path"`        | [4](#4-create-the-workspace-directory), [5](#5-update-pi-install-samba-config-samba) | Change this if you are using a different directory to store the code on the raspberry pi side.                                                                                                  |
-| `"ws_rpi_debug_port"`         | [7](#7-open-a-port-for-debugpy-access)                                               | Change this if you are not using the port of `5678` for the `debugpy` server on the side of the raspberry pi                                                                                    |
+| Parameter                  | Step                                                                                 | Explanation                                                                                                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"ws_rpi_address"`         | Always                                                                               | **You must alwayas** manually set this to your pi's static ip, which can be found with `ip a`.                                                                              |
+| `"ws_rpi_sync_path"`       | [10](#10-map-network-drive)                                                          | Windows explorer may assign a different drive letter to the samba share than `Z:\\`, in this case change `"ws_rpi_sync_path"` (Don't forget to use double slash to escape). |
+| `"ws_rpi_entrypoint_file"` |                                                                                      | Change this if you have decided to change the entrypoint file, `main.py`                                                                                                    |
+| `"ws_rpi_user"`            | Installation                                                                         | Change this if you have set a username in the imager wizard. The default name is `pi`.                                                                                      |
+| `"ws_rpi_remote_path"`     | [4](#4-create-the-workspace-directory), [5](#5-update-pi-install-samba-config-samba) | Change this if you are using a different directory to store the code on the raspberry pi side.                                                                              |
+| `"ws_rpi_debug_port"`      | [7](#7-open-a-port-for-debugpy-access)                                               | Change this if you are not using the port of `5678` for the `debugpy` server on the side of the raspberry pi                                                                |
 
 ## Run the debugger
 

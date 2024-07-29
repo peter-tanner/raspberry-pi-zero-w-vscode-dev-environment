@@ -1,8 +1,8 @@
 {
   "ws_rpi_address": "192.168.137.135",
-  "ws_rpi_share_drive_letter": "P",
+  "ws_rpi_sync_path": "O:\\",
   "ws_rpi_entrypoint_file": "./main.py",
   "ws_rpi_user": "peter",
-  "ws_rpi_remote_path": "/home/peter/workspace",
+  "ws_rpi_remote_path": "/home/peter/workspace_python",
   "ws_rpi_debug_port": 5678
 }

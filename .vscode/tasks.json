@@ -11,10 +11,11 @@
     {
       "label": "start-debugging-nowait",
       "type": "shell",
+      "dependsOn": ["sync-workspace"],
       "command": "ssh.exe",
       "args": [
         "${config:ws_rpi_user}@${config:ws_rpi_address}",
-        "sudo pkill python3; cd workspace; nohup python3 -m debugpy --wait-for-client --listen 0.0.0.0:${config:ws_rpi_debug_port} \"${config:ws_rpi_entrypoint_file}\" 2&> /dev/null < /dev/null &"
+        "sudo pkill python3; cd ${config:ws_rpi_remote_path}; nohup python3 -m debugpy --wait-for-client --listen 0.0.0.0:${config:ws_rpi_debug_port} \"${config:ws_rpi_entrypoint_file}\" 2&> /dev/null < /dev/null &"
       ],
       "problemMatcher": []
     },
@@ -34,7 +35,7 @@
       "command": "robocopy",
       "args": [
         "${workspaceFolder}",
-        "${config:ws_rpi_share_drive_letter}:\\",
+        "${config:ws_rpi_sync_path}",
         "/MIR",
         "/XD",
         ".vscode",
